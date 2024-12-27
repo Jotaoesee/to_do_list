@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MiPaginaPrincipal extends StatefulWidget {
   const MiPaginaPrincipal({super.key});
@@ -9,6 +10,25 @@ class MiPaginaPrincipal extends StatefulWidget {
 
 class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
   List<String> tareas = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarTareas();
+  }
+
+  Future<void> _guardarTareas() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('tareas', tareas);
+  }
+
+  Future<void> _cargarTareas() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      tareas = prefs.getStringList('tareas') ??
+          []; // Carga las tareas o una lista vacía si no hay nada guardado
+    });
+  }
 
   void _mostrarDialogoAgregarTarea() {
     showDialog(
@@ -34,6 +54,7 @@ class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
               onPressed: () {
                 setState(() {
                   tareas.add(nuevaTarea);
+                  _guardarTareas();
                 });
                 Navigator.pop(context);
               },

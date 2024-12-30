@@ -10,6 +10,7 @@ class MiPaginaPrincipal extends StatefulWidget {
 
 class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
   List<String> tareas = [];
+  List<bool> tareasCompletadas = [];
 
   @override
   void initState() {
@@ -17,17 +18,21 @@ class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
     _cargarTareas();
   }
 
-  Future<void> _guardarTareas() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('tareas', tareas);
-  }
-
   Future<void> _cargarTareas() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      tareas = prefs.getStringList('tareas') ??
-          []; // Carga las tareas o una lista vacía si no hay nada guardado
+      tareas = prefs.getStringList('tareas') ?? [];
+      tareasCompletadas = List.generate(tareas.length,
+          (index) => prefs.getBool('tareaCompletada_$index') ?? false);
     });
+  }
+
+  Future<void> _guardarTareas() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('tareas', tareas);
+    for (int i = 0; i < tareasCompletadas.length; i++) {
+      await prefs.setBool('tareaCompletada_$i', tareasCompletadas[i]);
+    }
   }
 
   void _mostrarDialogoAgregarTarea() {
@@ -75,19 +80,43 @@ class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
       body: ListView.builder(
         itemCount: tareas.length,
         itemBuilder: (context, index) {
+          if (tareas.isEmpty) {
+            // Comprobación clave
+            return const Center(child: Text("No hay tareas. ¡Añade una!"));
+          }
+
+          final int tareaIndex = index;
           return ListTile(
-            title: Text(tareas[index]),
+            leading: Checkbox(
+              value: tareasCompletadas.length > tareaIndex
+                  ? tareasCompletadas[tareaIndex]
+                  : false, //Comprobación de longitud de la lista
+              onChanged: (value) {
+                setState(() {
+                  tareasCompletadas[tareaIndex] = value!;
+                  _guardarTareas();
+                });
+              },
+            ),
+            title: Text(
+              tareas[tareaIndex],
+              style: TextStyle(
+                decoration: tareasCompletadas.length > tareaIndex &&
+                        tareasCompletadas[tareaIndex]
+                    ? TextDecoration.lineThrough
+                    : null,
+              ),
+            ),
             trailing: IconButton(
-              // Añadimos el IconButton aquí
               icon: const Icon(Icons.delete),
               onPressed: () {
+                final int tareaIndex = index;
                 showDialog(
-                  // Dialogo de confirmacion
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('Eliminar tarea'),
+                    title: const Text('Eliminar tarea'), // ¡Añadido!
                     content: const Text(
-                        '¿Estás seguro de que quieres eliminar esta tarea?'),
+                        '¿Estás seguro de que quieres eliminar esta tarea?'), // ¡Añadido!
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
@@ -96,9 +125,9 @@ class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
                       TextButton(
                         onPressed: () {
                           setState(() {
-                            tareas.removeAt(
-                                index); // Elimina la tarea de la lista
-                            _guardarTareas(); // Guarda los cambios
+                            tareas.removeAt(tareaIndex);
+                            tareasCompletadas.removeAt(tareaIndex);
+                            _guardarTareas();
                           });
                           Navigator.pop(context);
                         },

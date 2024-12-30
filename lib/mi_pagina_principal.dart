@@ -77,6 +77,38 @@ class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
         itemBuilder: (context, index) {
           return ListTile(
             title: Text(tareas[index]),
+            trailing: IconButton(
+              // Añadimos el IconButton aquí
+              icon: const Icon(Icons.delete),
+              onPressed: () {
+                showDialog(
+                  // Dialogo de confirmacion
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Eliminar tarea'),
+                    content: const Text(
+                        '¿Estás seguro de que quieres eliminar esta tarea?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancelar'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            tareas.removeAt(
+                                index); // Elimina la tarea de la lista
+                            _guardarTareas(); // Guarda los cambios
+                          });
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Eliminar'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           );
         },
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MiPaginaPrincipal extends StatefulWidget {
   const MiPaginaPrincipal({super.key});
@@ -22,8 +23,10 @@ class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       tareas = prefs.getStringList('tareas') ?? [];
-      tareasCompletadas = List.generate(tareas.length,
-          (index) => prefs.getBool('tareaCompletada_$index') ?? false);
+      tareasCompletadas = List.generate(
+        tareas.length,
+        (index) => prefs.getBool('tareaCompletada_$index') ?? false,
+      );
     });
   }
 
@@ -40,30 +43,102 @@ class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
       context: context,
       builder: (context) {
         String nuevaTarea = '';
-
         return AlertDialog(
-          title: const Text('Agregar nueva tarea'),
+          title: Text(
+            'Agregar nueva tarea',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           content: TextField(
             onChanged: (value) {
               nuevaTarea = value;
             },
+            decoration: const InputDecoration(
+              hintText: 'Escribe tu tarea aquí...',
+            ),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancelar'),
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancelar',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
             ),
             TextButton(
               onPressed: () {
-                setState(() {
-                  tareas.add(nuevaTarea);
-                  _guardarTareas();
-                });
-                Navigator.pop(context);
+                if (nuevaTarea.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('La tarea no puede estar vacía'),
+                    ),
+                  );
+                } else {
+                  setState(() {
+                    tareas.add(nuevaTarea.trim());
+                    tareasCompletadas.add(false);
+                    _guardarTareas();
+                  });
+                  Navigator.pop(context);
+                }
               },
-              child: const Text('Agregar'),
+              child: Text(
+                'Agregar',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _mostrarDialogoEditarTarea(int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String tareaEditada = tareas[index];
+        return AlertDialog(
+          title: Text(
+            'Editar tarea',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          content: TextField(
+            onChanged: (value) {
+              tareaEditada = value;
+            },
+            controller: TextEditingController(text: tareas[index]),
+            decoration: const InputDecoration(
+              hintText: 'Edita tu tarea aquí...',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancelar',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                if (tareaEditada.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('La tarea no puede estar vacía'),
+                    ),
+                  );
+                } else {
+                  setState(() {
+                    tareas[index] = tareaEditada.trim();
+                    _guardarTareas();
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: Text(
+                'Guardar',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
             ),
           ],
         );
@@ -75,72 +150,86 @@ class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mi Lista de Tareas'),
+        title: Text(
+          'Mi Lista de Tareas',
+          style: Theme.of(context).textTheme.displayMedium,
+        ),
       ),
-      body: ListView.builder(
-        itemCount: tareas.length,
-        itemBuilder: (context, index) {
-          if (tareas.isEmpty) {
-            // Comprobación clave
-            return const Center(child: Text("No hay tareas. ¡Añade una!"));
-          }
-
-          final int tareaIndex = index;
-          return ListTile(
-            leading: Checkbox(
-              value: tareasCompletadas.length > tareaIndex
-                  ? tareasCompletadas[tareaIndex]
-                  : false, //Comprobación de longitud de la lista
-              onChanged: (value) {
-                setState(() {
-                  tareasCompletadas[tareaIndex] = value!;
-                  _guardarTareas();
-                });
-              },
-            ),
-            title: Text(
-              tareas[tareaIndex],
-              style: TextStyle(
-                decoration: tareasCompletadas.length > tareaIndex &&
-                        tareasCompletadas[tareaIndex]
-                    ? TextDecoration.lineThrough
-                    : null,
+      body: tareas.isEmpty
+          ? Center(
+              child: Text(
+                "No hay tareas. ¡Añade una!",
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () {
-                final int tareaIndex = index;
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Eliminar tarea'), // ¡Añadido!
-                    content: const Text(
-                        '¿Estás seguro de que quieres eliminar esta tarea?'), // ¡Añadido!
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancelar'),
+            )
+          : ListView.builder(
+              itemCount: tareas.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  leading: Checkbox(
+                    value: tareasCompletadas[index],
+                    onChanged: (value) {
+                      setState(() {
+                        tareasCompletadas[index] = value!;
+                        _guardarTareas();
+                      });
+                    },
+                  ),
+                  title: Text(
+                    tareas[index],
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          decoration: tareasCompletadas[index]
+                              ? TextDecoration.lineThrough
+                              : null,
+                        ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () => _mostrarDialogoEditarTarea(index),
                       ),
-                      TextButton(
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () {
-                          setState(() {
-                            tareas.removeAt(tareaIndex);
-                            tareasCompletadas.removeAt(tareaIndex);
-                            _guardarTareas();
-                          });
-                          Navigator.pop(context);
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text(
+                                'Eliminar tarea',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              content: Text(
+                                '¿Estás seguro de que quieres eliminar esta tarea?',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Cancelar'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      tareas.removeAt(index);
+                                      tareasCompletadas.removeAt(index);
+                                      _guardarTareas();
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Eliminar'),
+                                ),
+                              ],
+                            ),
+                          );
                         },
-                        child: const Text('Eliminar'),
                       ),
                     ],
                   ),
                 );
               },
             ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _mostrarDialogoAgregarTarea,
         child: const Icon(Icons.add),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class MiPaginaPrincipal extends StatefulWidget {
   const MiPaginaPrincipal({super.key});
@@ -165,67 +164,82 @@ class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
           : ListView.builder(
               itemCount: tareas.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  leading: Checkbox(
-                    value: tareasCompletadas[index],
-                    onChanged: (value) {
-                      setState(() {
-                        tareasCompletadas[index] = value!;
-                        _guardarTareas();
-                      });
-                    },
+                return Card(
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  title: Text(
-                    tareas[index],
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          decoration: tareasCompletadas[index]
-                              ? TextDecoration.lineThrough
-                              : null,
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: tareasCompletadas[index],
+                          onChanged: (value) {
+                            setState(() {
+                              tareasCompletadas[index] = value!;
+                              _guardarTareas();
+                            });
+                          },
                         ),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () => _mostrarDialogoEditarTarea(index),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text(
-                                'Eliminar tarea',
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              content: Text(
-                                '¿Estás seguro de que quieres eliminar esta tarea?',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Cancelar'),
+                        Expanded(
+                          child: Text(
+                            tareas[index],
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                  decoration: tareasCompletadas[index]
+                                      ? TextDecoration.lineThrough
+                                      : null,
                                 ),
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      tareas.removeAt(index);
-                                      tareasCompletadas.removeAt(index);
-                                      _guardarTareas();
-                                    });
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('Eliminar'),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () => _mostrarDialogoEditarTarea(index),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text(
+                                  'Eliminar tarea',
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
                                 ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                                content: Text(
+                                  '¿Estás seguro de que quieres eliminar esta tarea?',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Cancelar'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        tareas.removeAt(index);
+                                        tareasCompletadas.removeAt(index);
+                                        _guardarTareas();
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Eliminar'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

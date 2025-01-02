@@ -145,13 +145,47 @@ class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
     );
   }
 
+  double _calcularProgreso() {
+    int tareasCompletadasCount =
+        tareasCompletadas.where((tarea) => tarea).length;
+    return tareas.isEmpty ? 0.0 : tareasCompletadasCount / tareas.length;
+  }
+
   @override
   Widget build(BuildContext context) {
+    int tareasCompletadasCount =
+        tareasCompletadas.where((tarea) => tarea).length;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Mi Lista de Tareas',
           style: Theme.of(context).textTheme.displayMedium,
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Mostrar el texto con las tareas completadas y el total
+                Text(
+                  'Tareas completadas: $tareasCompletadasCount/${tareas.length}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // Barra de progreso
+                LinearProgressIndicator(
+                  value: _calcularProgreso(),
+                  backgroundColor: Colors.grey[300],
+                  color: Colors.green,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
       body: tareas.isEmpty

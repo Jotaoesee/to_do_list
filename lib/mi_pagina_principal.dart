@@ -164,81 +164,75 @@ class _MiPaginaPrincipalState extends State<MiPaginaPrincipal> {
           : ListView.builder(
               itemCount: tareas.length,
               itemBuilder: (context, index) {
-                return Card(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                return Dismissible(
+                  key: ValueKey(tareas[index]),
+                  background: Container(
+                    color: Colors.redAccent,
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: const Icon(Icons.delete, color: Colors.white),
                   ),
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
-                    child: Row(
-                      children: [
-                        Checkbox(
-                          value: tareasCompletadas[index],
-                          onChanged: (value) {
-                            setState(() {
-                              tareasCompletadas[index] = value!;
-                              _guardarTareas();
-                            });
-                          },
-                        ),
-                        Expanded(
-                          child: Text(
-                            tareas[index],
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(
-                                  decoration: tareasCompletadas[index]
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                ),
+                  secondaryBackground: Container(
+                    color: Colors.redAccent,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  onDismissed: (direction) {
+                    setState(() {
+                      tareas.removeAt(index);
+                      tareasCompletadas.removeAt(index);
+                      _guardarTareas();
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Tarea eliminada')),
+                    );
+                  },
+                  child: Card(
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 16),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.swipe,
+                            color: Colors.grey,
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _mostrarDialogoEditarTarea(index),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text(
-                                  'Eliminar tarea',
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
-                                ),
-                                content: Text(
-                                  '¿Estás seguro de que quieres eliminar esta tarea?',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('Cancelar'),
+                          const SizedBox(width: 12),
+                          Checkbox(
+                            value: tareasCompletadas[index],
+                            onChanged: (value) {
+                              setState(() {
+                                tareasCompletadas[index] = value!;
+                                _guardarTareas();
+                              });
+                            },
+                          ),
+                          Expanded(
+                            child: Text(
+                              tareas[index],
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium!
+                                  .copyWith(
+                                    decoration: tareasCompletadas[index]
+                                        ? TextDecoration.lineThrough
+                                        : null,
                                   ),
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        tareas.removeAt(index);
-                                        tareasCompletadas.removeAt(index);
-                                        _guardarTareas();
-                                      });
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text('Eliminar'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _mostrarDialogoEditarTarea(index),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

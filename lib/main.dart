@@ -25,9 +25,6 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
 
-        // El color principal para la aplicación, se utiliza para los widgets que heredan este color.
-        primarySwatch: Colors.teal,
-
         // Color de fondo para la aplicación, en este caso, un gris claro.
         scaffoldBackgroundColor: Colors.grey[100],
 
@@ -71,21 +68,6 @@ class MyApp extends StatelessWidget {
 
       // Widget principal de la aplicación, que es la página de tareas.
       home: const MiPaginaPrincipal(),
-
-      // Definimos un contenedor para agregar un fondo con gradiente.
-      builder: (context, child) {
-        return Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              // Definimos el gradiente de colores, que va de teal a tealAccent.
-              colors: [Colors.teal, Colors.tealAccent],
-              begin: Alignment.topLeft, // Dirección del gradiente.
-              end: Alignment.bottomRight, // Dirección del gradiente.
-            ),
-          ),
-          child: child,
-        );
-      },
     );
   }
 }
